@@ -6,6 +6,9 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
+// Import database initialization
+import { initializeDatabase } from './database/db.js';
+
 // Import routes
 import locationRoutes from './routes/locations.js';
 import userRoutes from './routes/users.js';
@@ -96,13 +99,27 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Turkey Audio Tours API running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-});
+// Start server with database initialization
+const startServer = async () => {
+  try {
+    // Initialize database tables and default data
+    await initializeDatabase();
+    
+    // Start the server
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Turkey Audio Tours API running on port ${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+// Start the server
+startServer();
 
 export default app;
 
